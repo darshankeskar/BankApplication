@@ -1,7 +1,3 @@
-Here is the same `README.md` as before, with one extra section at the end clearly stating that **only documentation was prepared with help from AI**, and that the **code was written manually**.  
-You can paste this directly into your repo.
-
----
 
 ```markdown
 # Bank Transaction System
