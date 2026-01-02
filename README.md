@@ -248,7 +248,46 @@ Each thread group has the same configuration, targeting a different client.
 
 ---
 
-## JMeter Summary Report (Results from Run Shown in Screenshot)
+7. Testing & Verification Summary (per Assessment)
+8000 Requests at a time / 8000 RPS:
+JMeter uses 8000 concurrent virtual users per bank, looping to generate a sustained high load.
+JMeter:
+Test plan bank-load-test.jmx configured with 2 thread groups.
+Summary Report screenshots included.
+Concurrency:
+Clients: ExecutorService + CompletableFuture for async forwarding.
+Server: ExecutorService for processing, Spring @Transactional, ConcurrentHashMap + DB unique constraint, HikariCP for DB pooling.
+Load Distribution:
+Bank A and Bank B each handle 50% of total load (4000 users each if you use single loop / 8000 total).
+Success vs Failure:
+Measured via DB (status + reason) and JMeter Error%.
+Average & Peak Times:
+From JMeter Summary Report and DB processing_time_ms.
+Observations Under High Load:
+Server and DB remained stable.
+No race conditions on trxId.
+Thread and connection pools prevent resource exhaustion.
+Ultimate Goal:
+System handles ≥8000 concurrent requests from both clients, with correct logging and concurrency control.
+8. Evaluation Criteria Mapping
+Correct multithreaded processing:
 
-> These values are taken from the Summary Report in the attached screenshot.
+Explicit use of ExecutorService and async patterns on both client and server.
+Clean separation between HTTP threads and processing threads.
+Stability under high concurrency:
 
+HikariCP limits DB connections.
+Multi-layered control for trxId uniqueness (ConcurrentHashMap + UNIQUE constraint).
+Verified behavior through high load tests.
+Clean project structure:
+
+Separate modules (server/, client-bank-a/, client-bank-b/, database/, requests/).
+Clear layering (controller, service, DTO, entity, repository).
+Clear explanation of testing approach:
+
+JMeter configuration, parameters, and results documented.
+DB queries and screenshots included.
+Observations under load summarized.
+9. Note on Documentation & AI Assistance
+All source code, configuration, and tests in this repository were implemented manually.
+This README and some of the documentation text were drafted with the help of an AI assistant only for documentation purposes, in order to format and summarize the design, testing approach, and results more clearly.
