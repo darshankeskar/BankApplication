@@ -172,6 +172,8 @@ bank-load-test.jmx
 
 Each thread group has the same configuration, targeting a different client.
 
+---
+
 ### Thread Group: Bank A Load
 
 - **Number of Threads (users)**: `8000`
@@ -202,6 +204,8 @@ Each thread group has the same configuration, targeting a different client.
 **HTTP Header Manager: `Bank A Headers`**
 
 - `Content-Type: application/json`
+
+---
 
 ### Thread Group: Bank B Load
 
@@ -234,91 +238,84 @@ Each thread group has the same configuration, targeting a different client.
 
 - `Content-Type: application/json`
 
+---
+
 ### Listener: Summary Report
 
 - **Listener name**: `Summary Report For Bank Application JMeter Report`
 - Type: `Summary Report`
-- `bank-load-test.jmx` file is added for reference under the repository root.
-- All proof images (Summary Report, DB screenshots, etc.) are stored in the repo under:
-  - `test-results/images/`
+- `bank-load-test.jmx` file is added as reference.
+- All proof images are added in the repo under `test-results/images/`.
 
 ---
 
 ## 4. Testing & Verification Summary (per Assessment)
 
-The assessment requires:
-
-- 8000 requests at a time (8000 RPS).
-- Use JMeter to send 8000 concurrent requests.
-- Provide Summary Report screenshots.
-- Document concurrency, load distribution, success/failure counts, timings, and observations.
-
-This project satisfies those points as follows:
-
 - **8000 Requests at a time / 8000 RPS**
-  - JMeter uses 8000 concurrent virtual users per bank (16,000 concurrent users total when both thread groups are active).
-  - Each thread group can be configured for 1 or more loops to generate the desired number of requests.
+  - JMeter uses 8000 concurrent virtual users per bank, looping to generate a sustained high load.
+
 - **JMeter**
-  - Test plan `bank-load-test.jmx` is configured with 2 thread groups (Bank A and Bank B).
+  - Test plan `bank-load-test.jmx` configured with 2 thread groups (Bank A Load, Bank B Load).
   - Summary Report screenshots are included under `test-results/images/`.
+
 - **Concurrency**
-  - **Clients**:
-    - Use `ExecutorService` + `CompletableFuture` to forward XML to the server asynchronously.
-    - `/bank/transaction` endpoints remain non-blocking from the client perspective.
-  - **Server**:
-    - Uses an `ExecutorService` (`transactionExecutor`) for multithreaded transaction processing.
-    - Uses Spring `@Transactional`, `ConcurrentHashMap` for in-flight `trxId` guarding, a DB `UNIQUE(trx_id)` constraint, and HikariCP for DB connection pooling.
+  - Clients:
+    - Use `ExecutorService` + `CompletableFuture` for asynchronous forwarding of XML to the server.
+  - Server:
+    - Uses a dedicated `ExecutorService` for processing.
+    - Uses Spring `@Transactional`, `ConcurrentHashMap` + DB unique constraint for `trxId` control.
+    - Uses HikariCP for DB connection pooling.
+
 - **Load Distribution**
-  - Bank A and Bank B each handle 50% of total load:
-    - For example, 4000 users each (8000 total) or 8000 each when pushing beyond the minimum.
+  - Bank A and Bank B each handle 50% of total load (e.g., 4000 users each if a single loop is used for a total of 8000 requests).
+
 - **Success vs Failure**
   - Measured via:
-    - Database `transaction_log` table (`status` and `reason` columns).
-    - JMeter Summary Report error percentage (HTTP-level errors).
-  - Business-level failures (e.g. `Duplicate Transaction`, `Insufficient Balance`, validation errors) are logged with `status = FAILED` and appropriate `reason`.
+    - Database (`transaction_log` table: `status` + `reason`).
+    - JMeter Error% in the Summary Report.
+  - Business failures (e.g., `Duplicate Transaction`, `Insufficient Balance`, validation errors) are logged with `status = FAILED`.
+
 - **Average & Peak Times**
-  - From JMeter Summary Report (Average, Min, Max, Std.Dev, percentiles).
-  - From DB via queries on `processing_time_ms`:
-    - `AVG`, `MIN`, `MAX` processing times.
+  - From JMeter Summary Report:
+    - `Average`, `Min`, `Max`, `Std. Dev.` values.
+  - From DB:
+    - `AVG`, `MIN`, `MAX` over `processing_time_ms`.
+
 - **Observations Under High Load**
-  - Server and DB remain stable.
-  - No race conditions on `trxId` due to the combination of `ConcurrentHashMap` and unique constraint.
-  - Thread pools and HikariCP connection pool protect the system from resource exhaustion.
+  - Server and DB remained stable.
+  - No race conditions on `trxId` because `ConcurrentHashMap` and the DB unique constraint protect against duplicates.
+  - Thread pools and the HikariCP connection pool prevent resource exhaustion.
+
 - **Ultimate Goal**
-  - The system successfully handles ≥8000 concurrent requests from both clients, with proper logging, concurrency control, and data integrity.
+  - System handles ≥8000 concurrent requests from both clients, with correct logging, concurrency control, and data integrity.
 
 ---
 
 ## 5. Evaluation Criteria Mapping
 
-The assessment specifies:
-
-- Correct multithreaded processing
-- Stability under high concurrency
-- Clean project structure
-- Clear explanation of testing approach
-
-This implementation addresses them as follows:
-
 - **Correct multithreaded processing**
-  - Explicit use of `ExecutorService` and async patterns (`CompletableFuture`) on both client and server.
-  - Clear separation between HTTP threads (Tomcat) and processing threads (dedicated executor).
+  - Explicit use of `ExecutorService` and async patterns on both client and server.
+  - Clear separation between HTTP threads and processing threads.
+
 - **Stability under high concurrency**
-  - HikariCP limits and manages DB connections efficiently.
-  - `ConcurrentHashMap` + DB `UNIQUE(trx_id)` ensure consistent handling of transaction IDs without race conditions.
-  - High-load JMeter tests confirm stable behavior.
+  - HikariCP limits DB connections and manages pooling.
+  - Multi-layered control for `trxId` uniqueness (`ConcurrentHashMap` + `UNIQUE(trx_id)` constraint).
+  - Verified through JMeter high-load tests.
+
 - **Clean project structure**
   - Separate modules: `server/`, `client-bank-a/`, `client-bank-b/`, `database/`, `requests/`.
-  - Clear layering into controller, service, DTO, entity, and repository packages.
+  - Clear layering: controller, service, DTO, entity, repository.
+
 - **Clear explanation of testing approach**
   - JMeter configuration, parameters, and results are documented in this README.
-  - DB queries and screenshots are included in `test-results/images/`.
+  - DB queries and screenshots (in `test-results/images/`) demonstrate success vs failure and timings.
   - Observations under load are summarized.
 
 ---
 
 ## 6. Note on Documentation & AI Assistance
 
-All **source code, configuration, and tests** in this repository were implemented manually.
+All source code, configuration, and tests in this repository were implemented manually.
 
-This **README** and some of the surrounding documentation text were drafted with the help of an AI assistant **only for documentation purposes**, to better format and summarize the design, testing approach, and results. The logic and implementation of the code are entirely manual.
+This README and some of the documentation text were drafted with the help of an AI assistant **only for documentation purposes**, in order to format and summarize the design, testing approach, and results more clearly.
+```
