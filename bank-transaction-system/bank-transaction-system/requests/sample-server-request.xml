@@ -1,0 +1,10 @@
+<TransactionRequest>
+    <TrxId>TRX-20250923-000001</TrxId>
+    <BankId>BANK_A</BankId>
+    <CustomerId>892345</CustomerId>
+    <FromAccount>1234567890</FromAccount>
+    <ToAccount>9876543210</ToAccount>
+    <Amount>1250.75</Amount>
+    <Currency>INR</Currency>
+    <Timestamp>2025-09-23T15:41:32.456+05:30</Timestamp>
+</TransactionRequest>

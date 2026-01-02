@@ -1,0 +1,41 @@
+server:
+  port: 8080
+  tomcat:
+    max-threads: 500
+    accept-count: 10000
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/banktransdb
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+    hikari:
+      pool-name: BankTxHikariPool
+      maximum-pool-size: 80
+      minimum-idle: 10
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+logging:
+  level:
+    root: INFO
+
+transaction:
+  executor:
+    pool-size: 100

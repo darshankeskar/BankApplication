@@ -1,0 +1,7 @@
+{
+  "customerId": 892345,
+  "fromAccount": "1234567890",
+  "toAccount": "9876543210",
+  "amount": 1250.75,
+  "currency": "INR"
+}
