@@ -243,7 +243,8 @@ Each thread group has the same configuration, targeting a different client.
 
 - **Listener name**: `Summary Report For Bank Application JMeter Report`
 - Type: `Summary Report`
-- Attached at Test Plan level so it aggregates both thread groups.
+- bank-load-test.jml file added as for reference .
+- all proof of images added in the repo - test-results/images/
 
 ---
 
