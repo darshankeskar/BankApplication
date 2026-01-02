@@ -384,7 +384,7 @@ This verifies:
 
 ---
 
-## 9. Note on Documentation & AI Assistance
+## 9. Note on Documentation 
 
 All **source code, configuration, and tests** in this repository were implemented manually.  
 This README and some of the documentation text were drafted with the help of an AI assistant **only for documentation purposes**, in order to format and summarize the design, testing approach, and results more clearly.
